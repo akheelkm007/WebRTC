@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title></title>
+	<script src="peer.js"></script>	
+</head>
+
+<body>
+
+<input class="peerId" placeholder="Enter unique id">
+<button class="peerBtn">Submit</button>
+
+<input class="otherPeerId" placeholder="Enter unique id of Receiver">
+<button class="otherPeerBtn">Submit</button>
+
+<input class="sendMsg" placeholder="Send Message">
+<button class="msgBtn">Submit</button>
+
+<button class="callSomeone">Make Video Call</button>
+
+<video class="caller"></video>
+
+<video class="callee"></video>
+<script>
+
+var peer,conn;
+
+$('.peerBtn').addEventListener('click',createpeer);
+
+$('.otherPeerBtn').addEventListener('click',connectToPeer);
+
+$('.msgBtn').addEventListener('click',sendData);
+
+
+function sendData () {
+	
+	conn.send($('.sendMsg').value);
+}
+
+
+
+
+function connectToPeer () {
+	conn = peer.connect($('.otherPeerId').value);
+		
+	conn.on('open', function(){
+			conn.send('hi!');
+	});
+}
+
+
+function receiveData () {
+
+	if(peer)
+	{
+
+
+		console.log('ready to receive Data');
+
+			peer.on('connection', function(conn) {
+  		
+		    		console.log(conn);
+
+		  		conn.on('data', function(data){
+	
+		    
+		    		console.log(data);
+
+		    		var x = document.createElement('p');
+		    		x.textContent = data;
+		    		document.body.appendChild(x);
+
+		  		});
+			});
+	}
+
+	else
+	{
+		setTimeout(receiveData,500);
+	}
+
+
+}
+
+
+function createpeer () {
+
+
+	console.log('inside');	
+	peer = new Peer($('.peerId').value, {host: '192.168.0.20', port: 9000, path: '/'});
+	console.log('over');	
+	receiveData();
+	receiveCall();
+}
+
+function $ (argument) {
+	return document.querySelector(argument);
+}
+
+
+navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia;
+
+
+function makeCall () {
+
+
+
+	navigator.getUserMedia({video: true, audio: true}, function(stream) {
+	  var call = peer.call($('.otherPeerId').value, stream);
+	  call.on('stream', function(remoteStream) {
+		    // Show stream in some video/canvas element.
+		    $('.caller').src=URL.createObjectURL(remoteStream);
+	  	});
+	}, function(err) {
+	  console.log('Failed to get local stream' ,err);
+	});
+
+}
+
+
+
+
+
+
+
+
+function receiveCall () {
+
+	if(peer)
+	{
+
+		peer.on('call', function(call) {
+		  navigator.getUserMedia({video: true, audio: true}, function(stream) {
+		    call.answer(stream); // Answer the call with an A/V stream.
+		    call.on('stream', function(remoteStream) {
+		      // Show stream in some video/canvas element.
+		
+				$('.callee').src=URL.createObjectURL(remoteStream);
+		    });
+		  }, function(err) {
+		    console.log('Failed to get local stream' ,err);
+		  });
+		});
+
+	}
+
+	else
+	{
+		setTimeout(receiveCall,500);
+	}
+
+
+}
+
+
+
+
+
+
+
+
+
+
+
+	
+</script>
+
+
+
+</body>
+</html>
