@@ -18,16 +18,16 @@
 
 <button class="callSomeone">Make Video Call</button>
 
-<video class="caller"></video>
+<video class="caller" autoplay></video>
 
-<video class="callee"></video>
+<video class="callee" autoplay></video>
 <script>
 
 var peer,conn;
 
 $('.peerBtn').addEventListener('click',createpeer);
 
-$('.otherPeerBtn').addEventListener('click',connectToPeer);
+$('.otherPeerBtn').addEventListener('click',makeCall);
 
 $('.msgBtn').addEventListener('click',sendData);
 
